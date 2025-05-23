@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # BRMHack25-MPHTML
 
 Setup:
@@ -11,3 +12,6 @@ cv2: pip install cv2
 
 
 It uses Tesseract and Easyocr to scan receipts and gets recipes from them to encourage users to make food with them, thus leading to less food waste. api used for receipe is spooncular
+=======
+# ShelfAware
+>>>>>>> a5bc09ce1d2a26494b526037b8d04f3cfd230ea8
