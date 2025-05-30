@@ -1,137 +1,424 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Receipt Scanner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShelfAware</title>
+  <link rel="stylesheet" href="../static/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Roboto, Arial, sans-serif;
+      background: #fff8f0;
+      text-align: center;
+    }
+
+    .slider {
+      position: relative;
+      width: 100vw;
+      height: 300px;
+      overflow: hidden;
+    }
+
+    .slides {
+      display: flex;
+      width: 300vw;
+      height: 300px;
+      animation: slide 15s infinite;
+    }
+
+    .slide {
+      width: 100vw;
+      height: 300px;
+      flex-shrink: 0;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @keyframes slide {
+      0%, 33% { transform: translateX(0); }
+      34%, 66% { transform: translateX(-100vw); }
+      67%, 100% { transform: translateX(-200vw); }
+    }
+
+    .header-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.85);
+      padding: 20px 40px;
+      border-radius: 10px;
+    }
+
+    .upload-section {
+      margin-top: 50px;
+    }
+
+    #filePreview {
+      margin: 20px auto 10px;
+      text-align: center;
+    }
+
+    .upload-circle {
+      width: 30vw;
+      height: 30vw;
+      max-width: 400px;
+      max-height: 400px;
+      background: linear-gradient(to bottom right, #ff7e5f, #feb47b);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      padding: 20px;
+    }
+
+    .upload-label {
+      color: white;
+      font-size: 14px;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+
+    .upload-input {
+      display: none;
+    }
+
+    .submit-btn {
+      background: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      color: #ff7e5f;
+      font-weight: bold;
+    }
+
+    .submit-btn:hover {
+      background: #ffe0d3;
+    }
+
+    #progressContainer {
+      width: 80%;
+      max-width: 400px;
+      margin: 20px auto;
+      background: #eee;
+      border-radius: 10px;
+      height: 15px;
+      display: none;
+    }
+
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background: #ff7e5f;
+      border-radius: 10px;
+      transition: width 0.2s ease;
+    }
+
+    #results {
+      margin-top: 40px;
+    }
+
+    .result-card {
+      background: #ffffff;
+      margin: 30px auto;
+      padding: 25px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      max-width: 600px;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    .result-card h3 {
+      color: #ff7e5f;
+      margin-bottom: 15px;
+      font-weight: 600;
+      font-size: 20px;
+      border-bottom: 1px solid #ffe1d1;
+      padding-bottom: 5px;
+    }
+
+    .result-card ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+
+    .result-card ul li {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+
+    .missing-info {
+      font-style: italic;
+      color: #999;
+    }
+
+    footer {
+      margin-top: 60px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    footer a {
+      color: #888;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      background: #ff7e5f;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .back-btn:hover {
+      background: #feb47b;
+    }
+  </style>
 </head>
 <body>
-    <div class="everything">
-        <!-- TOP -->
-        <div class="top-bar">
-            <h1>Product Scanner</h1>
-            <div class="buttons">
-                <button class="about-btn" onclick="toggleVisibility('about')">About</button>
-                <button class="instructions-btn" onclick="toggleVisibility('instrct')">Instructions</button>
-            </div>
-        </div>
 
-        <!-- MIDDLE -->
-        <div class="middle-bar">
-            <div id="aboutDiv" class="about-text" style="display: block;">
-                <h1 id="aboutH1" class="actual-h1">About:</h1>
-                <p id="about" class="actual-p" style="display: block;">
-                    This website scans your receipt and, after some time, 
-                    it should tell you the expiration date and recipes with your purchased products.  
-                    This helps you stay organized by ensuring you never miss an expiration
-                    date for food, supplements, or household items. Our tool saves you time,
-                    reduces waste, and keeps you informed about when to use or replace your products.
-                    This was done using HTML, CSS, Javascript, and various back-end languages/APIs.
-                </p>
-            </div>
-            <div id="instrctDiv" class="instruct-text" style="display: block;">
-                <h1 id="instrctH1" class="actual-h1">Instructions:</h1>
-                <p id = "instrct" class="actual-p" style="display: block;">
-                    To scan the receipt, upload a jpeg/picture of your receipt from your folder,
-                    then press submit. <strong>&darr;</strong>
-                </p>
-            </div>
-        </div>
-
-        <!-- BOTTOM -->
-        <div class="bottom-bar">
-            <p>Submit your receipt image here:</p>
-            <input id="fileInput" class="scan" type="file">
-            <button type="button" onclick="uploadFile()" class="scan">Submit</button>
-
-            <!-- Dynamic results section -->
-            <div id="results">
-                <h3>Detected Items and Shelf Life:</h3>
-                <div id="loading"></div>
-                <ul id="detectedItemsList" class="results-list"></ul>
-                <h3>Suggested Recipes:</h3>
-                <ul id="recipeList" class="results-list"></ul>
-            </div>
-        </div>
+  <header>
+    <div class="slider" role="region" aria-label="Image slider of food">
+      <div class="slides">
+        <div class="slide"><img src="../static/food3.jpg" alt="Delicious meal" loading="lazy" /></div>
+        <div class="slide"><img src="../static/food4.jpg" alt="Plated dish" loading="lazy" /></div>
+        <div class="slide"><img src="https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?auto=format&fit=crop&w=1400&q=80" alt="Healthy food" loading="lazy" /></div>
+      </div>
+      <div class="header-content">
+        <h1>ShelfAware</h1>
+        <p>Upload and scan your receipts to reduce waste and get recipe suggestions</p>
+      </div>
     </div>
-    <footer>Made By: <strong>Cullen, Nihal, and William (1-18-2025)</strong></footer>
+  </header>
 
-    <script>
-        // Function to toggle visibility of sections (About or Instructions)
-        function toggleVisibility(section) {
-            const element = document.getElementById(section);
-            if (element) {
-                if (element.style.display === "none" || element.style.display === "") {
-                    element.style.display = "block";
-                } else {
-                    element.style.display = "none";
-                }
-            } else {
-                console.error(`Element with ID "${section}" not found.`);
-            }
+  <main>
+    <section class="upload-section" aria-label="Receipt upload form">
+      <div id="filePreview"></div>
+      <div class="upload-circle">
+        <label for="fileInput" class="upload-label">
+          Upload a picture of your receipt<br>Drag, drop, or browse
+        </label>
+        <input type="file" id="fileInput" accept="image/*" class="upload-input" />
+        <button type="button" onclick="uploadFile()" class="submit-btn" id="submitBtn" disabled>Submit Receipt</button>
+      </div>
+
+      <div id="progressContainer">
+        <div id="progressBar"></div>
+      </div>
+    </section>
+
+    <section id="results" style="display:none;">
+      <div class="result-card">
+        <h3>Detected Items and Shelf Life</h3>
+        <ul id="detectedItemsList"></ul>
+      </div>
+
+      <div class="result-card">
+        <h3>Suggested Recipes</h3>
+        <ul id="recipeList"></ul>
+      </div>
+
+      <button class="back-btn" onclick="goBack()">Back</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 ShelfAware. All rights reserved.</p>
+    <a href="#">About</a>
+    <a href="#">Terms</a>
+    <a href="#">Privacy</a>
+  </footer>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', function () {
+      const submitBtn = document.getElementById('submitBtn');
+      const previewDiv = document.getElementById('filePreview');
+      previewDiv.innerHTML = "";
+
+      if (this.files.length > 0) {
+        const file = this.files[0];
+        submitBtn.disabled = false;
+
+        const fileName = document.createElement('p');
+        fileName.textContent = `Selected: ${file.name}`;
+        fileName.style.fontSize = "14px";
+        fileName.style.color = "#444";
+        fileName.style.margin = "10px 0";
+        previewDiv.appendChild(fileName);
+
+        if (file.type.startsWith('image/')) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          img.style.maxWidth = "200px";
+          img.style.marginTop = "10px";
+          img.style.borderRadius = "8px";
+          img.onload = () => URL.revokeObjectURL(img.src);
+          previewDiv.appendChild(img);
+        }
+      } else {
+        submitBtn.disabled = true;
+      }
+    });
+
+    let progressInterval;
+
+    async function uploadFile() {
+      const progressContainer = document.getElementById('progressContainer');
+      const progressBar = document.getElementById('progressBar');
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+
+      let progress = 0;
+      progressInterval = setInterval(() => {
+        if (progress < 90) {
+          progress += 1; // simulate progress
+          progressBar.style.width = progress + '%';
+        }
+      }, 100); // every 100ms
+
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Please select a file first!');
+        clearInterval(progressInterval);
+        progressBar.style.width = '0%';
+        progressContainer.style.display = 'none';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'PUT',
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data.error) {
+          alert(`Error: ${data.error}`);
+          clearInterval(progressInterval);
+          progressBar.style.width = '0%';
+          progressContainer.style.display = 'none';
+          return;
         }
 
-        // Function to handle file upload and send it to the server
-        function uploadFile() {
-            const loadingDiv = document.getElementById('loading');
-            const loadingImg = document.createElement('IMG');
-            loadingImg.style.width = "20px"; loadingImg.style.marginTop = "5px";
-            loadingDiv.appendChild(loadingImg);
-            loadingImg.src = "{{ url_for('static', filename='loading.gif') }}";
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
 
-            if (!file) {
-                alert('Please select a file first!');
-                return;
-            }
+        // Hide upload circle & file preview & submit button
+        document.querySelector('.upload-circle').style.display = 'none';
+        document.getElementById('filePreview').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'none';
 
-            const formData = new FormData();
-            formData.append('file', file);
+        // Show results section
+        document.getElementById('results').style.display = 'block';
 
-            // Sending the file to the Flask server using a PUT request
-            fetch('/upload', {
-                method: 'PUT',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Server Response:", data);
-                if (data.error) {
-                    alert(`Error: ${data.error}`);
-                } else {
-                    // Display detected items with shelf life
-                    const detectedItemsList = document.getElementById('detectedItemsList');
-                    detectedItemsList.innerHTML = "";
-                    data.detected_foods.forEach((item, index) => {
-                        const li = document.createElement('li');
-                        li.textContent = `${item} - ${data.shelf_life[index]}`;
-                        detectedItemsList.appendChild(li);
-                    });
+        displayResults(data);
 
-                    // Display recipes
-                    const recipeList = document.getElementById('recipeList');
-                    recipeList.innerHTML = "";
-                    if (data.recipes) {
-                        data.recipes.forEach(recipe => {
-                            const li = document.createElement('li');
-                            li.textContent = recipe.title;
-                            recipeList.appendChild(li);
-                        });
-                    } else {
-                        recipeList.innerHTML = "<li>No recipes found.</li>";
-                    }
+      } catch (error) {
+        alert('Upload failed: ' + error.message);
+        clearInterval(progressInterval);
+        progressBar.style.width = '0%';
+        progressContainer.style.display = 'none';
+      }
+    }
 
-                    document.getElementById('loading').removeChild(loadingImg);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while processing the file.');
-            });
-        }
-    </script>
+    function displayResults(data) {
+      const detectedItemsList = document.getElementById('detectedItemsList');
+      const recipeList = document.getElementById('recipeList');
+      detectedItemsList.innerHTML = '';
+      recipeList.innerHTML = '';
+
+      // Default shelf life if not found
+      const defaultShelfLife = "Shelf Life: 2 weeks";
+
+      if (data.detected_foods && data.shelf_life) {
+        data.detected_foods.forEach((food, index) => {
+          let shelf = data.shelf_life[index] || defaultShelfLife;
+          if (!shelf || shelf.toLowerCase().includes("not found")) {
+            shelf = defaultShelfLife;
+          }
+          const li = document.createElement('li');
+          li.textContent = `${food} - ${shelf}`;
+          detectedItemsList.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.textContent = 'No foods detected.';
+        detectedItemsList.appendChild(li);
+      }
+
+      if (data.recipes && data.recipes.length > 0) {
+        data.recipes.forEach(recipe => {
+          const li = document.createElement('li');
+          li.style.marginBottom = "15px";
+
+          const img = document.createElement('img');
+          img.src = recipe.image;
+          img.alt = recipe.title;
+          img.style.width = "80px";
+          img.style.height = "60px";
+          img.style.objectFit = "cover";
+          img.style.borderRadius = "8px";
+          img.style.marginRight = "10px";
+          img.loading = "lazy";
+
+          const span = document.createElement('span');
+          span.textContent = recipe.title;
+
+          li.appendChild(img);
+          li.appendChild(span);
+          recipeList.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.textContent = 'No recipes found.';
+        recipeList.appendChild(li);
+      }
+    }
+
+    function goBack() {
+      // Reset progress bar
+      clearInterval(progressInterval);
+      const progressContainer = document.getElementById('progressContainer');
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = '0%';
+      progressContainer.style.display = 'none';
+
+      // Hide results, show upload circle & file preview & submit button
+      document.getElementById('results').style.display = 'none';
+      document.querySelector('.upload-circle').style.display = 'flex';
+      document.getElementById('filePreview').style.display = 'block';
+      document.getElementById('submitBtn').style.display = 'inline-block';
+      document.getElementById('submitBtn').disabled = true;
+
+      // Clear file input & preview
+      const fileInput = document.getElementById('fileInput');
+      fileInput.value = '';
+      document.getElementById('filePreview').innerHTML = '';
+    }
+  </script>
 </body>
 </html>
