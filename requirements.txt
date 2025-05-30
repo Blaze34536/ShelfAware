@@ -1,0 +1,12 @@
+flask
+gunicorn
+opencv-python-headless
+numpy
+requests
+spacy
+fatsecret
+python-dotenv
+pyspellchecker
+rauth
+shelf-life @ git+https://github.com/your-username/shelf_life.git  # adjust if local or private
+en_core_web_md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.7.1/en_core_web_md-3.7.1-py3-none-any.whl
